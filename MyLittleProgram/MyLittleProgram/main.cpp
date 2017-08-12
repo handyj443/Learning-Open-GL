@@ -1,7 +1,10 @@
 #include <iostream>
 
-#include <glad\glad.h>
-#include <GLFW\glfw3.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "shader.h"
 #include "stb_image.h"
 
@@ -208,5 +211,5 @@ void processInput(GLFWwindow *window)
 
 float Clamp(float input, float low, float high)
 {
-    return min(max(low, input), high);
+    return glm::min(glm::max(low, input), high);
 }
