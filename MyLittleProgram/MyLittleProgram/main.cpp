@@ -44,6 +44,11 @@ int main()
 
 	//__________________________________________________________________________
 	// INITIALISATION
+	int nAttritubes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nAttritubes);
+	std::cout << "Max vertex attributes supported: " << nAttritubes << std::endl;
+
+
 	// Triangle
 	VAO triangleVao;
 	{
@@ -143,6 +148,7 @@ int main()
 
 	// SHADERS
 	SPO shaderProgram;
+	SPO shaderProgram2;
 	{// Vertex shader
 		const char *vertexShaderSource = R"(
 			#version 330 core
@@ -189,6 +195,29 @@ int main()
 				<< infoLog << std::endl;
 		}
 
+		// Fragment shader 2
+		const char *fragmentShaderSource2 = R"(
+			#version 330 core
+			out vec4 FragColor;
+
+									void main()
+			{
+				FragColor = vec4(2.0f, 0.5f, 1.0f, 1.0f);
+			})";
+
+		FSO fragmentShader2;
+		fragmentShader2 = glCreateShader(GL_FRAGMENT_SHADER);
+		glShaderSource(fragmentShader2, 1, &fragmentShaderSource2, NULL);
+		glCompileShader(fragmentShader2);
+		glGetShaderiv(fragmentShader2, GL_COMPILE_STATUS, &success);
+		if (!success)
+		{
+			char infoLog[512];
+			glGetShaderInfoLog(fragmentShader2, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
+				<< infoLog << std::endl;
+		}
+
 		// Shader program
 		shaderProgram = glCreateProgram();
 		glAttachShader(shaderProgram, vertexShader);
@@ -201,6 +230,22 @@ int main()
 		{
 			char infoLog[512];
 			glGetShaderInfoLog(shaderProgram, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n"
+				<< infoLog << std::endl;
+		}
+
+		// Shader program 2
+		shaderProgram2 = glCreateProgram();
+		glAttachShader(shaderProgram2, vertexShader);
+		glDeleteShader(vertexShader);
+		glAttachShader(shaderProgram2, fragmentShader2);
+		glDeleteShader(fragmentShader);
+		glLinkProgram(shaderProgram2);
+		glGetProgramiv(shaderProgram2, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			char infoLog[512];
+			glGetShaderInfoLog(shaderProgram2, 512, NULL, infoLog);
 			std::cout << "ERROR::SHADER::PROGRAM::LINK_FAILED\n"
 				<< infoLog << std::endl;
 		}
@@ -222,6 +267,8 @@ int main()
 		// triangle
 		glBindVertexArray(triangleVao);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
+
+		glUseProgram(shaderProgram2);
 		glBindVertexArray(triangle2Vao);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 

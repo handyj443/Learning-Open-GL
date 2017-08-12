@@ -70,11 +70,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>C:\Users\David\pgm\learningopengl\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\David\pgm\learningopengl\Libs\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\David\pgm\learningopengl\Libs\DebugLibs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>C:\Users\David\pgm\learningopengl\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\David\pgm\learningopengl\Libs\Release;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\David\pgm\learningopengl\Libs\ReleaseLibs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
