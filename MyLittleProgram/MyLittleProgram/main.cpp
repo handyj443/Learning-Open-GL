@@ -49,7 +49,7 @@ int main()
 	std::cout << "Max vertex attributes supported: " << nAttritubes << std::endl;
 
 
-	// Triangle
+	// Triangles
 	VAO triangleVao;
 	{
 		float triangleVertices[] = {
@@ -79,10 +79,11 @@ int main()
 
 	VAO triangle2Vao;
 	{
-		float triangleVertices[] = {
-			0.1f, -0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f,
-			0.1f,  0.5f, 0.0f
+		float triangle2Vertices[] = {
+			// positions		// colors
+			0.1f, -0.5f, 0.0f,	1.0f, 0.0f, 0.0f,
+			0.5f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,
+			0.1f,  0.5f, 0.0f,	0.0f, 0.0f, 1.0f
 		};
 
 		// Bind vertex array object
@@ -90,18 +91,22 @@ int main()
 		glBindVertexArray(triangle2Vao);
 
 		// Attach vertex buffer object
-		VBO triangleVbo;
-		glGenBuffers(1, &triangleVbo);
-		glBindBuffer(GL_ARRAY_BUFFER, triangleVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices),
-					 triangleVertices, GL_STATIC_DRAW);
+		VBO triangle2Vbo;
+		glGenBuffers(1, &triangle2Vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, triangle2Vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(triangle2Vertices),
+					 triangle2Vertices, GL_STATIC_DRAW);
 		// Set our vertex attributes pointers
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+		// location, size, type, normalized, stride, pointer offset)
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
 							  (void *)0);
 		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+							  (void *)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
-		glDeleteBuffers(1, &triangleVbo);
+		glDeleteBuffers(1, &triangle2Vbo);
 	}
 
 	VAO rectangleVao;
@@ -154,7 +159,7 @@ int main()
 			#version 330 core
 			layout (location = 0) in vec3 aPos;
 
-								void main()
+			void main()
 			{
 				gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
 			})";
@@ -172,14 +177,42 @@ int main()
 				<< infoLog << std::endl;
 		}
 
+		// Vertex shader 2
+		const char *vertexShader2Source = R"(
+			#version 330 core
+			layout (location = 0) in vec3 aPos;
+			layout (location = 1) in vec3 aColor; // vertex color
+
+			out vec3 ourColor;
+
+			void main()
+			{
+				gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+				ourColor = aColor;
+			})";
+		VSO vertexShader2;
+		vertexShader2 = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(vertexShader2, 1, &vertexShader2Source, NULL);
+		glCompileShader(vertexShader2);
+		glGetShaderiv(vertexShader2, GL_COMPILE_STATUS, &success);
+		if (!success)
+		{
+			char infoLog[512];
+			glGetShaderInfoLog(vertexShader2, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+				<< infoLog << std::endl;
+		}
+
 		// Fragment shader
 		const char *fragmentShaderSource = R"(
 			#version 330 core
 			out vec4 FragColor;
 
-						void main()
+			uniform vec4 ourColor;
+
+			void main()
 			{
-				FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+				FragColor = ourColor;
 			})";
 
 		FSO fragmentShader;
@@ -198,11 +231,12 @@ int main()
 		// Fragment shader 2
 		const char *fragmentShaderSource2 = R"(
 			#version 330 core
+			in vec3 ourColor;
 			out vec4 FragColor;
 
-									void main()
+			void main()
 			{
-				FragColor = vec4(2.0f, 0.5f, 1.0f, 1.0f);
+				FragColor = vec4(ourColor, 1.0f);
 			})";
 
 		FSO fragmentShader2;
@@ -236,8 +270,8 @@ int main()
 
 		// Shader program 2
 		shaderProgram2 = glCreateProgram();
-		glAttachShader(shaderProgram2, vertexShader);
-		glDeleteShader(vertexShader);
+		glAttachShader(shaderProgram2, vertexShader2);
+		glDeleteShader(vertexShader2);
 		glAttachShader(shaderProgram2, fragmentShader2);
 		glDeleteShader(fragmentShader);
 		glLinkProgram(shaderProgram2);
@@ -262,9 +296,14 @@ int main()
 
 
 		// RENDER
-		glUseProgram(shaderProgram);
 
 		// triangle
+		float timeValue = (float)glfwGetTime();
+		float greenValue = sin(timeValue) / 2.0f + 0.5f;
+		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+		
+		glUseProgram(shaderProgram);
+		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 		glBindVertexArray(triangleVao);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
