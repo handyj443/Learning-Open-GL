@@ -170,7 +170,8 @@ int main()
 		float greenValue = sin(timeValue) / 2.0f + 0.5f;
 
 		shaderProgram.Use();
-		shaderProgram.SetFloat("xOffset", timeValue * 0.1f);
+		// shaderProgram.SetFloat("xOffset", timeValue * 0.1f);
+		shaderProgram.SetFloat("xOffset", 0.0f);
 		shaderProgram.SetFloat4("ourColor", 0.0f, greenValue, 0.0f, 1.0f);
 		glBindVertexArray(triangleVao);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
