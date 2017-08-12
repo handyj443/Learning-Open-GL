@@ -16,6 +16,9 @@ using TXO = u32;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
+float Clamp(float input, float low, float high);
+
+float g_mixFactor = 0.5f;
 
 int main()
 {
@@ -56,10 +59,10 @@ int main()
 	{
 		float rectangleVertices[] = {
 		    // positions          // colors           // texture coords
-		     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-		     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-		    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-		    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
+		     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.6f, 0.6f,   // top right
+		     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.6f, 0.4f,   // bottom right
+		    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.4f, 0.4f,   // bottom left
+		    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.4f, 0.6f    // top left 
 		};
 		u32 rectangleIndices[] = {
 			// note that we start from 0!
@@ -107,26 +110,42 @@ int main()
 	Shader shaderProgram("shaders/1.vs", "shaders/1.fs");
 
     // TEXTURES
-    TXO texture;
-    int width, height, nChannels;
-    u8 *textureData = stbi_load("assets/nico.png", &width, &height, &nChannels, 0);
-    if (textureData)
+    const u32 NUM_TEXTURES = 2;
+    TXO textures[NUM_TEXTURES];
+    int widths[NUM_TEXTURES];
+    int heights[NUM_TEXTURES];
+    int nChannels[NUM_TEXTURES];
+    stbi_set_flip_vertically_on_load(true);
+    u8 *nicoTextureData = stbi_load("assets/nico.png", &widths[0], &heights[0], &nChannels[0], 0);
+    u8 *nozomiTextureData = stbi_load("assets/nozomi_trans.png", &widths[1], &heights[1], &nChannels[1], 0);
+    if (nicoTextureData && nozomiTextureData)
     {
-        glGenTextures(1, &texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glGenTextures(NUM_TEXTURES, textures);
+
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                     GL_UNSIGNED_BYTE, textureData);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widths[0], heights[0], 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, nicoTextureData);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glBindTexture(GL_TEXTURE_2D, textures[1]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widths[1], heights[1], 0, GL_RGBA,
+                     GL_UNSIGNED_BYTE, nozomiTextureData);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
     {
     	std::cout << "Failed to load texture." << std::endl;
     }
-    stbi_image_free(textureData);
+    stbi_image_free(nicoTextureData);
+    stbi_image_free(nozomiTextureData);
 
 	// MAIN LOOP
 	while (!glfwWindowShouldClose(window))
@@ -141,7 +160,17 @@ int main()
 		// RENDER
 		// rectangle
 		shaderProgram.Use();
+		shaderProgram.SetInt("texture0", 0);
+		shaderProgram.SetInt("texture1", 1);
+        g_mixFactor = Clamp(g_mixFactor, 0.0f, 1.0f);
+		shaderProgram.SetFloat("mixFactor", g_mixFactor);
+		
 		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glActiveTexture(GL_TEXTURE0); // activate the texture unit first
+		glBindTexture(GL_TEXTURE_2D, textures[0]);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, textures[1]);
+		
 		glBindVertexArray(rectangleVao);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
@@ -167,4 +196,17 @@ void processInput(GLFWwindow *window)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
+	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	{
+		g_mixFactor -= 0.1f;
+	}
+	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	{
+		g_mixFactor += 0.1f;
+	}
+}
+
+float Clamp(float input, float low, float high)
+{
+    return min(max(low, input), high);
 }
