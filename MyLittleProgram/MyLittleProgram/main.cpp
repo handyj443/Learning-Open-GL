@@ -3,14 +3,16 @@
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
 #include "shader.h"
+#include "stb_image.h"
 
 using u32 = unsigned int;
+using u8 = unsigned char;
 using VAO = u32;
 using VBO = u32;
 using EBO = u32;
 using VSO = u32;
 using FSO = u32;
-using SPO = u32;
+using TXO = u32;
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -50,70 +52,14 @@ int main()
 	std::cout << "Max vertex attributes supported: " << nAttritubes
 	          << std::endl;
 
-
-	// Triangles
-	VAO triangleVao;
-	{
-		float triangleVertices[]
-		    = { -0.5f, -0.5f, 0.0f, -0.1f, -0.5f, 0.0f, -0.1f, 0.5f, 0.0f };
-
-		// Bind vertex array object
-		glGenVertexArrays(1, &triangleVao);
-		glBindVertexArray(triangleVao);
-
-		// Attach vertex buffer object
-		VBO triangleVbo;
-		glGenBuffers(1, &triangleVbo);
-		glBindBuffer(GL_ARRAY_BUFFER, triangleVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(triangleVertices),
-		             triangleVertices, GL_STATIC_DRAW);
-		// Set our vertex attributes pointers
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-		                      (void *)0);
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-		glDeleteBuffers(1, &triangleVbo);
-	}
-
-	VAO triangle2Vao;
-	{
-		float triangle2Vertices[]
-		    = { // positions		// colors
-			    0.1f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.5f, -0.5f, 0.0f,
-			    0.0f, 1.0f,  0.0f, 0.1f, 0.5f, 0.0f, 0.0f, 0.0f,  1.0f
-		      };
-
-		// Bind vertex array object
-		glGenVertexArrays(1, &triangle2Vao);
-		glBindVertexArray(triangle2Vao);
-
-		// Attach vertex buffer object
-		VBO triangle2Vbo;
-		glGenBuffers(1, &triangle2Vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, triangle2Vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(triangle2Vertices),
-		             triangle2Vertices, GL_STATIC_DRAW);
-		// Set our vertex attributes pointers
-		// location, size, type, normalized, stride, pointer offset)
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-		                      (void *)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-		                      (void *)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-		glDeleteBuffers(1, &triangle2Vbo);
-	}
-
 	VAO rectangleVao;
 	{
 		float rectangleVertices[] = {
-			0.5f,  0.5f,  0.0f, // top right
-			0.5f,  -0.5f, 0.0f, // bottom right
-			-0.5f, -0.5f, 0.0f, // bottom left
-			-0.5f, 0.5f,  0.0f  // top left
+		    // positions          // colors           // texture coords
+		     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+		     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+		    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+		    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
 		};
 		u32 rectangleIndices[] = {
 			// note that we start from 0!
@@ -132,9 +78,17 @@ int main()
 		glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices),
 		             rectangleVertices, GL_STATIC_DRAW);
 		// Set our vertex attributes pointers
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
 		                      (void *)0);
 		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+		                      (void *)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+		                      (void *)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		
+		
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		// Attach element buffer object
@@ -151,7 +105,28 @@ int main()
 
 	// SHADERS
 	Shader shaderProgram("shaders/1.vs", "shaders/1.fs");
-	Shader shaderProgram2("shaders/2.vs", "shaders/2.fs");
+
+    // TEXTURES
+    TXO texture;
+    int width, height, nChannels;
+    u8 *textureData = stbi_load("assets/nico.png", &width, &height, &nChannels, 0);
+    if (textureData)
+    {
+        glGenTextures(1, &texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                     GL_UNSIGNED_BYTE, textureData);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+    	std::cout << "Failed to load texture." << std::endl;
+    }
+    stbi_image_free(textureData);
 
 	// MAIN LOOP
 	while (!glfwWindowShouldClose(window))
@@ -164,34 +139,18 @@ int main()
 
 
 		// RENDER
-
-		// triangle
-		float timeValue = (float)glfwGetTime();
-		float greenValue = sin(timeValue) / 2.0f + 0.5f;
-
+		// rectangle
 		shaderProgram.Use();
-		// shaderProgram.SetFloat("xOffset", timeValue * 0.1f);
-		shaderProgram.SetFloat("xOffset", 0.0f);
-		shaderProgram.SetFloat4("ourColor", 0.0f, greenValue, 0.0f, 1.0f);
-		glBindVertexArray(triangleVao);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		shaderProgram2.Use();
-		glBindVertexArray(triangle2Vao);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		//// rectangle
 		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		// glBindVertexArray(rectangleVao);
-		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		// glBindVertexArray(0);
+		glBindVertexArray(rectangleVao);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
 
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
-	glDeleteVertexArrays(1, &triangleVao);
 	glDeleteVertexArrays(1, &rectangleVao);
 
 	glfwTerminate();
