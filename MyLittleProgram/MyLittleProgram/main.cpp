@@ -37,7 +37,7 @@ float g_deltaTime = 0.0f;
 float g_lastFrame = 0.0f;
 
 // Light
-glm::vec3 g_lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 g_wLightPos(1.2f, 1.0f, 2.0f);
 glm::vec3 g_lightCol(1.0f, 1.0f, 1.0f);
 
 // Cube
@@ -132,7 +132,7 @@ int main()
 
 
     // CAMERA
-    g_camera.Position = glm::vec3(0.0f, 0.0f, 6.0f);
+    g_camera.wPosition = glm::vec3(0.0f, 0.0f, 6.0f);
 
     // GEOMETRY	
 
@@ -254,14 +254,15 @@ int main()
 		lightingShader.SetMat4("projection", projection);
         lightingShader.SetVec3("objectColor", 1.0f, 0.5f, 0.31f);
         lightingShader.SetVec3("lightColor", g_lightCol);
-        lightingShader.SetVec3("wLightPos", g_lightPos);
-        lightingShader.SetVec3("wViewPos", g_camera.Position);
+        // lightingShader.SetVec3("wLightPos", g_wLightPos);
+        lightingShader.SetVec3("vLightPos", view * glm::vec4(g_wLightPos, 1.0));
+        lightingShader.SetVec3("wViewPos", g_camera.wPosition);
         glBindVertexArray(cubeVao);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // lamp
         model = glm::mat4();
-        model = glm::translate(model, g_lightPos);
+        model = glm::translate(model, g_wLightPos);
         model = glm::scale(model, glm::vec3(0.2f));
         lampShader.Use();
         lampShader.SetMat4("model", model);
