@@ -191,7 +191,7 @@ int main()
     Shader lampShader("shaders/lamp.vs", "shaders/lamp.fs");
 
     // TEXTURES
-    const u32 NUM_TEXTURES = 3;
+    const u32 NUM_TEXTURES = 2;
     TXO textures[NUM_TEXTURES];
     u8 *textureData[NUM_TEXTURES];
     int widths[NUM_TEXTURES];
@@ -200,8 +200,7 @@ int main()
     stbi_set_flip_vertically_on_load(true);
     textureData[0] = stbi_load("assets/crate_dif.png", &widths[0], &heights[0], &nChannels[0], 0);
     textureData[1] = stbi_load("assets/crate_spec.png", &widths[1], &heights[1], &nChannels[1], 0);
-    textureData[2] = stbi_load("assets/matrix.jpg", &widths[2], &heights[2], &nChannels[2], 0);
-    if (textureData[0] && textureData[1] && textureData[2])
+    if (textureData[0] && textureData[1])
     {
         glGenTextures(NUM_TEXTURES, textures);
 
@@ -222,15 +221,6 @@ int main()
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widths[1], heights[1], 0, GL_RGBA,
                      GL_UNSIGNED_BYTE, textureData[1]);
         glGenerateMipmap(GL_TEXTURE_2D);
-
-        glBindTexture(GL_TEXTURE_2D, textures[2]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widths[2], heights[2], 0, GL_RGB,
-                     GL_UNSIGNED_BYTE, textureData[2]);
-        glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
     {
@@ -238,7 +228,6 @@ int main()
     }
     stbi_image_free(textureData[0]);
     stbi_image_free(textureData[1]);
-    stbi_image_free(textureData[2]);
 
 	// MAIN LOOP
     while (!glfwWindowShouldClose(window))
@@ -264,29 +253,23 @@ int main()
 
 		// cube
         glm::mat4 model;
+        //model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
 		lightingShader.Use();
 		lightingShader.SetMat4("model", model);
 		lightingShader.SetMat4("view", view);
 		lightingShader.SetMat4("projection", projection);
-        
-        //lightingShader.SetInt("material.diffuse", 0);
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, textures[0]);
+        lightingShader.SetInt("material.diffuse", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
         lightingShader.SetInt("material.specular", 1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, textures[1]);
-        //lightingShader.SetInt("material.emission", 2);
-        //glActiveTexture(GL_TEXTURE2);
-        //glBindTexture(GL_TEXTURE_2D, textures[2]);
         lightingShader.SetFloat("material.shininess", 32.0f);
-
         lightingShader.SetVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         lightingShader.SetVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken the light a bit to fit the scene
         lightingShader.SetVec3("light.specular", 1.0f, 1.0f, 1.0f);
         lightingShader.SetVec3("light.position", view * glm::vec4(g_wLightPos, 1.0));
-        
         lightingShader.SetVec3("wViewPos", g_camera.wPosition);
-        
         glBindVertexArray(cubeVao);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -314,7 +297,6 @@ int main()
 
 	glfwTerminate();
 }
-
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
