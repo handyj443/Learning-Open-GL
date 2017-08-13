@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <string>
 #include <fstream>
@@ -25,6 +27,7 @@ public:
 	void SetFloat(const std::string &name, float value) const;
 	void SetFloat4(const std::string &name, float f0, float f1, float f2,
 	               float f3) const;
+	void SetMatrix(const std::string &name, const glm::mat4 &matrix);
 };
 
 Shader::Shader(const char *vertexPath, const char *fragmentPath)
@@ -133,4 +136,9 @@ void Shader::SetFloat4(const std::string &name, float f0, float f1, float f2,
 {
 	glUniform4f(glGetUniformLocation(m_programId, name.c_str()), f0, f1, f2,
 	            f3);
+}
+
+void Shader::SetMatrix(const std::string &name, const glm::mat4 &matrix)
+{
+	glUniformMatrix4fv(glGetUniformLocation(m_programId, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
 }

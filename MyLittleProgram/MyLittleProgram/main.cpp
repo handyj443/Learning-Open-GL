@@ -62,10 +62,10 @@ int main()
 	{
 		float rectangleVertices[] = {
 		    // positions          // colors           // texture coords
-		     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.6f, 0.6f,   // top right
-		     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   0.6f, 0.4f,   // bottom right
-		    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.4f, 0.4f,   // bottom left
-		    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.4f, 0.6f    // top left 
+		     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+		     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+		    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+		    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
 		};
 		u32 rectangleIndices[] = {
 			// note that we start from 0!
@@ -161,10 +161,25 @@ int main()
 
 
 		// RENDER
+
+        // transform
+        glm::mat4 model;
+        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+        
+        glm::mat4 view;
+        view = glm::translate(view, glm::vec3(0.0, 0.0, -3.0));
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(45.0f),
+                                      (float)VIEWPORT_WIDTH / VIEWPORT_HEIGHT, 0.1f, 100.0f);
+
 		// rectangle
 		shaderProgram.Use();
 		shaderProgram.SetInt("texture0", 0);
 		shaderProgram.SetInt("texture1", 1);
+		shaderProgram.SetMatrix("model", model);
+		shaderProgram.SetMatrix("view", view);
+		shaderProgram.SetMatrix("projection", projection);
+		
         g_mixFactor = Clamp(g_mixFactor, 0.0f, 1.0f);
 		shaderProgram.SetFloat("mixFactor", g_mixFactor);
 		
@@ -176,6 +191,7 @@ int main()
 		
 		glBindVertexArray(rectangleVao);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 		glBindVertexArray(0);
 
 
