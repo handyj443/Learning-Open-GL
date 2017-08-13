@@ -22,7 +22,7 @@ const float YAW = -90.0f;
 const float PITCH = 0.0f;
 const float SPEED = 2.5f;
 const float SENSITIVTY = 0.15f;
-const float ZOOM = 45.0f;
+const float ZOOM = 55.0f;
 const float ZOOM_SENSITIVTY = 5.0f;
 
 

@@ -25,9 +25,11 @@ public:
 	void SetBool(const std::string &name, bool value) const;
 	void SetInt(const std::string &name, int value) const;
 	void SetFloat(const std::string &name, float value) const;
-	void SetFloat4(const std::string &name, float f0, float f1, float f2,
-	               float f3) const;
-	void SetMatrix(const std::string &name, const glm::mat4 &matrix);
+	void SetVec3(const std::string &name, float f0, float f1, float f2) const;
+    void SetVec3(const std::string & name, const glm::vec3 &v) const;
+	void SetVec4(const std::string &name, float f0, float f1, float f2,
+	             float f3) const;
+	void SetMat4(const std::string &name, const glm::mat4 &matrix);
 };
 
 Shader::Shader(const char *vertexPath, const char *fragmentPath)
@@ -131,14 +133,22 @@ void Shader::SetFloat(const std::string &name, float value) const
 {
 	glUniform1f(glGetUniformLocation(m_programId, name.c_str()), value);
 }
-void Shader::SetFloat4(const std::string &name, float f0, float f1, float f2,
+void Shader::SetVec3(const std::string & name, float f0, float f1, float f2) const
+{
+    glUniform3f(glGetUniformLocation(m_programId, name.c_str()), f0, f1, f2);
+}
+void Shader::SetVec3(const std::string & name, const glm::vec3 &v) const
+{
+    glUniform3f(glGetUniformLocation(m_programId, name.c_str()), v.x, v.y, v.z);
+}
+void Shader::SetVec4(const std::string &name, float f0, float f1, float f2,
                        float f3) const
 {
 	glUniform4f(glGetUniformLocation(m_programId, name.c_str()), f0, f1, f2,
 	            f3);
 }
 
-void Shader::SetMatrix(const std::string &name, const glm::mat4 &matrix)
+void Shader::SetMat4(const std::string &name, const glm::mat4 &matrix)
 {
 	glUniformMatrix4fv(glGetUniformLocation(m_programId, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
 }

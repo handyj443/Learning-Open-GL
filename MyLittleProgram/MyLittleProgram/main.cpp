@@ -27,7 +27,7 @@ void processInput(GLFWwindow *window);
 float Clamp(float input, float low, float high);
 
 // Global camera
-Camera g_camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera g_camera;
 float g_lastX;
 float g_lastY;
 bool g_firstMouse = true;
@@ -35,6 +35,56 @@ bool g_firstMouse = true;
 // Global timing
 float g_deltaTime = 0.0f;
 float g_lastFrame = 0.0f;
+
+// Light
+glm::vec3 g_lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 g_lightCol(1.0f, 1.0f, 1.0f);
+
+// Cube
+float g_cubeVertices[] = 
+{
+   -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+   -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+   -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+   -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+   -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+   -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+   -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+   -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+   -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+   -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+   -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+   -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+};
 
 int main()
 {
@@ -81,81 +131,59 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
 
+    // CAMERA
+    g_camera.Position = glm::vec3(0.0f, 0.0f, 6.0f);
+
     // GEOMETRY	
-	// Cube
+
+	// Cube vertex buffer
+    VBO cubeVbo;
+    glGenBuffers(1, &cubeVbo);
+
 	VAO cubeVao;
 	{
-		float cubeVertices[] = {
-	    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-	     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-	    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-	    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-	     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-	     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-	    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-	    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-	    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-		};	
 		// Bind vertex array object
 		glGenVertexArrays(1, &cubeVao);
 		glBindVertexArray(cubeVao);
 
-		// Attach vertex buffer object
-		VBO cubeVbo;
-		glGenBuffers(1, &cubeVbo);
 		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices),
-		             cubeVertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(g_cubeVertices),
+		             g_cubeVertices, GL_STATIC_DRAW);
 		// Set our vertex attributes pointers
 		// Position
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
 		                      (void *)0);
 		glEnableVertexAttribArray(0);
-		// TexCoords
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+		// Normal
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
 		                      (void *)(3 * sizeof(float)));
-		glEnableVertexAttribArray(2);
+		glEnableVertexAttribArray(1);
 		
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 		glBindVertexArray(0);
-		glDeleteBuffers(1, &cubeVbo);
+	}
+	
+	// Lamp
+	VAO lampVao;
+	{
+		// Bind vertex array object
+		glGenVertexArrays(1, &lampVao);
+		glBindVertexArray(lampVao);
+
+		// we only need to bind to the VBO, the container's VBO's data already contains the correct data.
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
+		// Position
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+		                      (void *)0);
+		glEnableVertexAttribArray(0);
+		
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
 	// SHADERS
-	Shader shaderProgram("shaders/1.vs", "shaders/1.fs");
+	Shader lightingShader("shaders/lighting.vs", "shaders/lighting.fs");
+    Shader lampShader("shaders/lamp.vs", "shaders/lamp.fs");
 
     // TEXTURES
     const u32 NUM_TEXTURES = 2;
@@ -210,10 +238,7 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // transform
-        glm::mat4 model;
-        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
-        
+        // camera
         glm::mat4 view;
         view = g_camera.GetViewMatrix();
         glm::mat4 projection;
@@ -221,21 +246,30 @@ int main()
                                       (float)VIEWPORT_WIDTH / VIEWPORT_HEIGHT, 0.1f, 100.0f);
 
 		// cube
-		shaderProgram.Use();
-		shaderProgram.SetInt("texture0", 0);
-		shaderProgram.SetInt("texture1", 1);
-		shaderProgram.SetMatrix("model", model);
-		shaderProgram.SetMatrix("view", view);
-		shaderProgram.SetMatrix("projection", projection);
-		
-		// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glActiveTexture(GL_TEXTURE0); // activate the texture unit first
-		glBindTexture(GL_TEXTURE_2D, textures[0]);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textures[1]);
-		
-		glBindVertexArray(cubeVao);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+        glm::mat4 model;
+        //model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+		lightingShader.Use();
+		lightingShader.SetMat4("model", model);
+		lightingShader.SetMat4("view", view);
+		lightingShader.SetMat4("projection", projection);
+        lightingShader.SetVec3("objectColor", 1.0f, 0.5f, 0.31f);
+        lightingShader.SetVec3("lightColor", g_lightCol);
+        lightingShader.SetVec3("wLightPos", g_lightPos);
+        lightingShader.SetVec3("wViewPos", g_camera.Position);
+        glBindVertexArray(cubeVao);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // lamp
+        model = glm::mat4();
+        model = glm::translate(model, g_lightPos);
+        model = glm::scale(model, glm::vec3(0.2f));
+        lampShader.Use();
+        lampShader.SetMat4("model", model);
+        lampShader.SetMat4("view", view);
+        lampShader.SetMat4("projection", projection);
+        lampShader.SetVec3("lightColor", g_lightCol);
+        glBindVertexArray(lampVao);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
 
@@ -244,6 +278,8 @@ int main()
 	}
 
 	glDeleteVertexArrays(1, &cubeVao);
+	glDeleteVertexArrays(1, &lampVao);
+	glDeleteBuffers(1, &cubeVbo);
 
 	glfwTerminate();
 }
