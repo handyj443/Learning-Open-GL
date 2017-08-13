@@ -43,47 +43,48 @@ glm::vec3 g_lightCol(1.0f, 1.0f, 1.0f);
 // Cube
 float g_cubeVertices[] = 
 {
-   -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-   -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-   -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+    // positions          // normals           // texture coords
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-   -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-   -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-   -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
-   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-   -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-   -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-   -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-   -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-    0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-    0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-    0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-   -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-    0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-    0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-   -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-   -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-   -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
 
 int main()
@@ -151,13 +152,17 @@ int main()
 		             g_cubeVertices, GL_STATIC_DRAW);
 		// Set our vertex attributes pointers
 		// Position
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
 		                      (void *)0);
 		glEnableVertexAttribArray(0);
 		// Normal
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
 		                      (void *)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
+		// Texcoords
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+		                      (void *)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
 		
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
@@ -173,7 +178,7 @@ int main()
 		// we only need to bind to the VBO, the container's VBO's data already contains the correct data.
 		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
 		// Position
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
 		                      (void *)0);
 		glEnableVertexAttribArray(0);
 		
@@ -182,46 +187,47 @@ int main()
 	}
 
 	// SHADERS
-	Shader lightingShader("shaders/lighting.vs", "shaders/lighting.fs");
+	Shader lightingShader("shaders/lightingTex.vs", "shaders/lightingTex.fs");
     Shader lampShader("shaders/lamp.vs", "shaders/lamp.fs");
 
     // TEXTURES
     const u32 NUM_TEXTURES = 2;
     TXO textures[NUM_TEXTURES];
+    u8 *textureData[NUM_TEXTURES];
     int widths[NUM_TEXTURES];
     int heights[NUM_TEXTURES];
     int nChannels[NUM_TEXTURES];
     stbi_set_flip_vertically_on_load(true);
-    u8 *nicoTextureData = stbi_load("assets/nico.png", &widths[0], &heights[0], &nChannels[0], 0);
-    u8 *nozomiTextureData = stbi_load("assets/nozomi_trans.png", &widths[1], &heights[1], &nChannels[1], 0);
-    if (nicoTextureData && nozomiTextureData)
+    textureData[0] = stbi_load("assets/crate_dif.png", &widths[0], &heights[0], &nChannels[0], 0);
+    textureData[1] = stbi_load("assets/crate_spec.png", &widths[1], &heights[1], &nChannels[1], 0);
+    if (textureData[0] && textureData[1])
     {
         glGenTextures(NUM_TEXTURES, textures);
 
         glBindTexture(GL_TEXTURE_2D, textures[0]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widths[0], heights[0], 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, nicoTextureData);
+                     GL_UNSIGNED_BYTE, textureData[0]);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glBindTexture(GL_TEXTURE_2D, textures[1]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widths[1], heights[1], 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, nozomiTextureData);
+                     GL_UNSIGNED_BYTE, textureData[1]);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
     {
-    	std::cout << "Failed to load texture." << std::endl;
+    	std::cout << "Failed to load textures." << std::endl;
     }
-    stbi_image_free(nicoTextureData);
-    stbi_image_free(nozomiTextureData);
+    stbi_image_free(textureData[0]);
+    stbi_image_free(textureData[1]);
 
 	// MAIN LOOP
     while (!glfwWindowShouldClose(window))
@@ -252,10 +258,17 @@ int main()
 		lightingShader.SetMat4("model", model);
 		lightingShader.SetMat4("view", view);
 		lightingShader.SetMat4("projection", projection);
-        lightingShader.SetVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        lightingShader.SetVec3("lightColor", g_lightCol);
-        // lightingShader.SetVec3("wLightPos", g_wLightPos);
-        lightingShader.SetVec3("vLightPos", view * glm::vec4(g_wLightPos, 1.0));
+        lightingShader.SetInt("material.diffuse", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
+        lightingShader.SetInt("material.specular", 1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textures[1]);
+        lightingShader.SetFloat("material.shininess", 32.0f);
+        lightingShader.SetVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        lightingShader.SetVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken the light a bit to fit the scene
+        lightingShader.SetVec3("light.specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.SetVec3("light.position", view * glm::vec4(g_wLightPos, 1.0));
         lightingShader.SetVec3("wViewPos", g_camera.wPosition);
         glBindVertexArray(cubeVao);
         glDrawArrays(GL_TRIANGLES, 0, 36);
