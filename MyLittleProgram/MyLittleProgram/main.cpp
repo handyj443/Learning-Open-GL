@@ -168,6 +168,19 @@ int main()
 		glBindVertexArray(0);
 	}
 	
+    glm::vec3 cubePositions[] = {
+        glm::vec3(0.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f,  2.0f, -2.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+
 	// Lamp
 	VAO lampVao;
 	{
@@ -252,12 +265,10 @@ int main()
                                       (float)VIEWPORT_WIDTH / VIEWPORT_HEIGHT, 0.1f, 100.0f);
 
 		// cube
-        glm::mat4 model;
-        //model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
 		lightingShader.Use();
-		lightingShader.SetMat4("model", model);
 		lightingShader.SetMat4("view", view);
 		lightingShader.SetMat4("projection", projection);
+
         lightingShader.SetInt("material.diffuse", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textures[0]);
@@ -265,16 +276,30 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, textures[1]);
         lightingShader.SetFloat("material.shininess", 32.0f);
+
         lightingShader.SetVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         lightingShader.SetVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken the light a bit to fit the scene
         lightingShader.SetVec3("light.specular", 1.0f, 1.0f, 1.0f);
         lightingShader.SetVec3("light.position", view * glm::vec4(g_wLightPos, 1.0));
+
         lightingShader.SetVec3("wViewPos", g_camera.wPosition);
         glBindVertexArray(cubeVao);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model;
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            lightingShader.SetMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+        glBindVertexArray(cubeVao);
 
         // lamp
-        model = glm::mat4();
+        glm::mat4 model;
         model = glm::translate(model, g_wLightPos);
         model = glm::scale(model, glm::vec3(0.2f));
         lampShader.Use();
