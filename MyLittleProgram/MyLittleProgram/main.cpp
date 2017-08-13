@@ -81,56 +81,77 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
 
-    // GEOMETRY
-	VAO rectangleVao;
+    // GEOMETRY	
+	// Cube
+	VAO cubeVao;
 	{
-		float rectangleVertices[] = {
-		    // positions          // colors           // texture coords
-		     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-		     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-		    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-		    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
-		};
-		u32 rectangleIndices[] = {
-			// note that we start from 0!
-			0, 1, 3, // first triangle
-			1, 2, 3  // second triangle
-		};
+		float cubeVertices[] = {
+	    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+	     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
+	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+	     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+	    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+	    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+	     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+	     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+	    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+	    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+	     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+	    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+	    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		};	
 		// Bind vertex array object
-		glGenVertexArrays(1, &rectangleVao);
-		glBindVertexArray(rectangleVao);
+		glGenVertexArrays(1, &cubeVao);
+		glBindVertexArray(cubeVao);
 
 		// Attach vertex buffer object
-		VBO rectangleVbo;
-		glGenBuffers(1, &rectangleVbo);
-		glBindBuffer(GL_ARRAY_BUFFER, rectangleVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices),
-		             rectangleVertices, GL_STATIC_DRAW);
+		VBO cubeVbo;
+		glGenBuffers(1, &cubeVbo);
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices),
+		             cubeVertices, GL_STATIC_DRAW);
 		// Set our vertex attributes pointers
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+		// Position
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
 		                      (void *)0);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+		// TexCoords
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
 		                      (void *)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-		                      (void *)(6 * sizeof(float)));
 		glEnableVertexAttribArray(2);
-		
 		
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		// Attach element buffer object
-		EBO rectangleEbo;
-		glGenBuffers(1, &rectangleEbo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rectangleEbo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rectangleIndices),
-		             rectangleIndices, GL_STATIC_DRAW);
 		glBindVertexArray(0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glDeleteBuffers(1, &rectangleVbo);
-		glDeleteBuffers(1, &rectangleEbo);
+		glDeleteBuffers(1, &cubeVbo);
 	}
 
 	// SHADERS
@@ -199,7 +220,7 @@ int main()
         projection = glm::perspective(glm::radians(g_camera.Zoom),
                                       (float)VIEWPORT_WIDTH / VIEWPORT_HEIGHT, 0.1f, 100.0f);
 
-		// rectangle
+		// cube
 		shaderProgram.Use();
 		shaderProgram.SetInt("texture0", 0);
 		shaderProgram.SetInt("texture1", 1);
@@ -213,17 +234,16 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, textures[1]);
 		
-		glBindVertexArray(rectangleVao);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(cubeVao);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0);
-
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
-	glDeleteVertexArrays(1, &rectangleVao);
+	glDeleteVertexArrays(1, &cubeVao);
 
 	glfwTerminate();
 }
