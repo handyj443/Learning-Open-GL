@@ -24,7 +24,8 @@ bld/
 [Oo]bj/
 [Ll]og/
 
-glfw-3.2.1/
+glfw*/
+assimp*/
 
 # Visual Studio 2015 cache/options directory
 .vs/
