@@ -280,7 +280,10 @@ int main()
         lightingShader.SetVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         lightingShader.SetVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken the light a bit to fit the scene
         lightingShader.SetVec3("light.specular", 1.0f, 1.0f, 1.0f);
-        lightingShader.SetVec3("light.vPosition", view * glm::vec4(g_wLightPos, 1.0));
+        // lightingShader.SetVec3("light.vPosition", view * glm::vec4(g_wLightPos, 1.0));
+        lightingShader.SetVec3("light.vPosition",  0.0f, 0.0f, 0.0f);
+        lightingShader.SetVec3("light.direction", 0.0f, 0.0f, -1.0f);
+        lightingShader.SetFloat("light.cutOff",   glm::cos(glm::radians(12.5f)));
         lightingShader.SetFloat("light.constant",  1.0f);
         lightingShader.SetFloat("light.linear",    0.09f);
         lightingShader.SetFloat("light.quadratic", 0.032f); 
