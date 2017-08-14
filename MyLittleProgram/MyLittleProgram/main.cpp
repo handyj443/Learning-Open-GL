@@ -280,7 +280,10 @@ int main()
         lightingShader.SetVec3("light.ambient", 0.2f, 0.2f, 0.2f);
         lightingShader.SetVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken the light a bit to fit the scene
         lightingShader.SetVec3("light.specular", 1.0f, 1.0f, 1.0f);
-        lightingShader.SetVec3("light.position", view * glm::vec4(g_wLightPos, 1.0));
+        lightingShader.SetVec3("light.vPosition", view * glm::vec4(g_wLightPos, 1.0));
+        lightingShader.SetFloat("light.constant",  1.0f);
+        lightingShader.SetFloat("light.linear",    0.09f);
+        lightingShader.SetFloat("light.quadratic", 0.032f); 
 
         lightingShader.SetVec3("wViewPos", g_camera.wPosition);
         glBindVertexArray(cubeVao);
