@@ -48,5 +48,29 @@
     <None Include="shaders\lighting.vs">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\1.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\1.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\2.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\2.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\lighting3.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\lighting3.vs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\lightingTex.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\lightingTex.vs">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

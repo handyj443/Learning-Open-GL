@@ -181,6 +181,13 @@ int main()
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
+    glm::vec3 pointLightWPositions[] = {
+        glm::vec3(0.7f,  0.2f,  2.0f),
+        glm::vec3(2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f,  2.0f, -12.0f),
+        glm::vec3(0.0f,  0.0f, -3.0f)
+    };
+
 	// Lamp
 	VAO lampVao;
 	{
@@ -200,7 +207,7 @@ int main()
 	}
 
 	// SHADERS
-	Shader lightingShader("shaders/lightingTex.vs", "shaders/lightingTex.fs");
+	Shader lightingShader("shaders/lighting3.vs", "shaders/lighting3.fs");
     Shader lampShader("shaders/lamp.vs", "shaders/lamp.fs");
 
     // TEXTURES
@@ -261,8 +268,9 @@ int main()
         glm::mat4 view;
         view = g_camera.GetViewMatrix();
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(g_camera.Zoom),
-                                      (float)VIEWPORT_WIDTH / VIEWPORT_HEIGHT, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(g_camera.Zoom),
+									  (float)VIEWPORT_WIDTH / VIEWPORT_HEIGHT,
+									  0.1f, 100.0f);
 
 		// cube
 		lightingShader.Use();
@@ -277,46 +285,79 @@ int main()
         glBindTexture(GL_TEXTURE_2D, textures[1]);
         lightingShader.SetFloat("material.shininess", 32.0f);
 
-        lightingShader.SetVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-        lightingShader.SetVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken the light a bit to fit the scene
-        lightingShader.SetVec3("light.specular", 1.0f, 1.0f, 1.0f);
-        // lightingShader.SetVec3("light.vPosition", view * glm::vec4(g_wLightPos, 1.0));
-        lightingShader.SetVec3("light.vPosition",  0.0f, 0.0f, 0.0f);
-        lightingShader.SetVec3("light.direction", 0.0f, 0.0f, -1.0f);
-        lightingShader.SetFloat("light.innerCutOff",   glm::cos(glm::radians(12.5f)));
-        lightingShader.SetFloat("light.outerCutOff",   glm::cos(glm::radians(17.5f)));
-        lightingShader.SetFloat("light.constant",  1.0f);
-        lightingShader.SetFloat("light.linear",    0.09f);
-        lightingShader.SetFloat("light.quadratic", 0.032f); 
+        lightingShader.SetVec3("dirLight.vDirection", view * glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f));
+        lightingShader.SetVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
+        lightingShader.SetVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
+        lightingShader.SetVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
 
-        lightingShader.SetVec3("wViewPos", g_camera.wPosition);
-        glBindVertexArray(cubeVao);
+		for (u32 i = 0; i < 4; i++)
+		{
+			glm::vec3 pointLightVPosition
+				= view * glm::vec4(pointLightWPositions[i], 1.0f);
+			std::string number = std::to_string(i);
+			lightingShader.SetVec3(
+				("pointLights[" + number + "].vPosition").c_str(),
+				pointLightVPosition);
+			lightingShader.SetVec3(
+				("pointLights[" + number + "].ambient").c_str(), 0.2f, 0.2f,
+				0.2f);
+			lightingShader.SetVec3(
+				("pointLights[" + number + "].diffuse").c_str(), 0.5f, 0.5f,
+				0.5f);
+			lightingShader.SetVec3(
+				("pointLights[" + number + "].specular").c_str(), 1.0f, 1.0f,
+				1.0f);
+			lightingShader.SetFloat(
+				("pointLights[" + number + "].constant").c_str(), 1.0f);
+			lightingShader.SetFloat(
+				("pointLights[" + number + "].linear").c_str(), 0.09f);
+			lightingShader.SetFloat(
+				("pointLights[" + number + "].quadratic").c_str(), 0.032f);
+		}
 
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            glm::mat4 model;
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            lightingShader.SetMat4("model", model);
+		lightingShader.SetVec3("spotLight.ambient", 0.2f, 0.2f, 0.2f);
+		lightingShader.SetVec3("spotLight.diffuse", 0.5f, 0.5f, 0.5f);
+		lightingShader.SetVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+		lightingShader.SetVec3("spotLight.vPosition", 0.0f, 0.0f, 0.0f);
+		lightingShader.SetVec3("spotLight.vDirection", 0.0f, 0.0f, -1.0f);
+		lightingShader.SetFloat("spotLight.innerCutOff",
+								glm::cos(glm::radians(12.5f)));
+		lightingShader.SetFloat("spotLight.outerCutOff",
+								glm::cos(glm::radians(17.5f)));
+		lightingShader.SetFloat("spotLight.constant", 1.0f);
+		lightingShader.SetFloat("spotLight.linear", 0.09f);
+		lightingShader.SetFloat("spotLight.quadratic", 0.032f);
 
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+		lightingShader.SetVec3("wViewPos", g_camera.wPosition);
+		glBindVertexArray(cubeVao);
 
-        glBindVertexArray(cubeVao);
+		// cubes
+		for (unsigned int i = 0; i < 10; i++)
+		{
+			glm::mat4 model;
+			model = glm::translate(model, cubePositions[i]);
+			float angle = 20.0f * i;
+			model = glm::rotate(model, glm::radians(angle),
+								glm::vec3(1.0f, 0.3f, 0.5f));
+			lightingShader.SetMat4("model", model);
 
-        // lamp
-        glm::mat4 model;
-        model = glm::translate(model, g_wLightPos);
-        model = glm::scale(model, glm::vec3(0.2f));
-        lampShader.Use();
-        lampShader.SetMat4("model", model);
-        lampShader.SetMat4("view", view);
-        lampShader.SetMat4("projection", projection);
-        lampShader.SetVec3("lightColor", g_lightCol);
-        glBindVertexArray(lampVao);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
+		// lamps
+		lampShader.Use();
+		lampShader.SetMat4("view", view);
+		lampShader.SetMat4("projection", projection);
+		glBindVertexArray(lampVao);
+		for (unsigned int i = 0; i < 4; i++)
+		{
+			glm::mat4 model;
+			model = glm::translate(model, pointLightWPositions[i]);
+			model = glm::scale(model, glm::vec3(0.2f));
+			lampShader.SetMat4("model", model);
+			lampShader.SetVec3("lightColor", g_lightCol);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 		glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
