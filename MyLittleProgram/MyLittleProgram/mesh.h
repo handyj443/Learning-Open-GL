@@ -12,8 +12,8 @@ struct Vertex
 	glm::vec3 Position;
 	glm::vec3 Normal;
 	glm::vec2 TexCoords;
-	glm::vec3 Tangent;
-	glm::vec3 Bitangent;
+	//glm::vec3 Tangent;
+	//glm::vec3 Bitangent;
 };
 
 struct Texture
@@ -80,12 +80,14 @@ void Mesh::SetupMesh()
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 						  (void *)offsetof(Vertex, TexCoords));
+
+	glBindVertexArray(0);
 }
 
 void Mesh::Draw(Shader shader) const
 {
-	unsigned int diffuseNr = 1;
-	unsigned int specularNr = 1;
+	unsigned int diffuseNr = 0;
+	unsigned int specularNr = 0;
 	for (unsigned int i = 0; i < m_textures.size(); i++)
 	{
 		// activate proper texture unit before binding

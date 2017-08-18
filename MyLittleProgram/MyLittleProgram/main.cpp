@@ -33,7 +33,7 @@ float g_lastFrame = 0.0f;
 
 // Light
 glm::vec3 g_wLightPos(1.2f, 1.0f, 2.0f);
-glm::vec3 g_lightCol(1.0f, 1.0f, 1.0f);
+glm::vec3 g_lightCol(1.0f, 0.4f, 0.0f);
 
 // Cube
 float g_cubeVertices[] = 
@@ -130,7 +130,6 @@ int main()
     g_camera.wPosition = glm::vec3(0.0f, 0.0f, 6.0f);
 
     // GEOMETRY	
-
     glm::vec3 pointLightWPositions[] = {
         glm::vec3(0.7f,  0.2f,  2.0f),
         glm::vec3(2.3f, -3.3f, -4.0f),
@@ -138,7 +137,7 @@ int main()
         glm::vec3(0.0f,  0.0f, -3.0f)
     };
 
-	// Lamp
+	// Lamps
 	VBO cubeVbo;
 	glGenBuffers(1, &cubeVbo);
 	VAO lampVao;
@@ -159,10 +158,13 @@ int main()
 		glBindVertexArray(0);
 	}
 
+	// Nanosuit
+	Model nanosuit("assets/nanosuit/nanosuit.obj");
+
 	// SHADERS
 	Shader lightingShader("shaders/lighting3.vs", "shaders/lighting3.fs");
-    Shader lampShader("shaders/lamp.vs", "shaders/lamp.fs");
-
+	Shader lampShader("shaders/lamp.vs", "shaders/lamp.fs");
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// MAIN LOOP
     while (!glfwWindowShouldClose(window))
@@ -236,8 +238,12 @@ int main()
 		lightingShader.SetFloat("spotLight.linear", 0.09f);
 		lightingShader.SetFloat("spotLight.quadratic", 0.032f);
 
+		// nanosuit
 
-
+		glm::mat4 model;
+		model = glm::scale(model, glm::vec3(0.2f));
+		lightingShader.SetMat4("model", model);
+		nanosuit.Draw(lightingShader);
 
 		// lamps
 		lampShader.Use();
@@ -254,6 +260,8 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 		glBindVertexArray(0);
+
+		//nanosuit.Draw(lampShader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

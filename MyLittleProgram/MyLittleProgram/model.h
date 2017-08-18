@@ -109,14 +109,14 @@ inline Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 		{
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 		}
-		vec.x = (float)mesh->mTangents[i].x; // Tangent
-		vec.y = (float)mesh->mTangents[i].y;
-		vec.z = (float)mesh->mTangents[i].z;
-		vertex.Tangent = vec;
-		vec.x = (float)mesh->mBitangents[i].x; // Bitangent
-		vec.y = (float)mesh->mBitangents[i].y;
-		vec.z = (float)mesh->mBitangents[i].z;
-		vertex.Bitangent = vec;
+		//vec.x = (float)mesh->mTangents[i].x; // Tangent
+		//vec.y = (float)mesh->mTangents[i].y;
+		//vec.z = (float)mesh->mTangents[i].z;
+		//vertex.Tangent = vec;
+		//vec.x = (float)mesh->mBitangents[i].x; // Bitangent
+		//vec.y = (float)mesh->mBitangents[i].y;
+		//vec.z = (float)mesh->mBitangents[i].z;
+		//vertex.Bitangent = vec;
 
 		vertices.push_back(vertex);
 	}
@@ -168,6 +168,7 @@ inline std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat,
 		bool skip = false;
 		for (const Texture &texture : m_texturesLoaded)
 		{
+			// look if we have already loaded this texture
 			if (texture.path == texPath.C_Str())
 			{
 				textures.push_back(texture);
@@ -177,11 +178,13 @@ inline std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat,
 		}
 		if (!skip)
 		{
+			// if texture hasn't been loaded already, load it
 			Texture texture;
 			texture.id = TextureFromFile(texPath.C_Str(), m_directory);
 			texture.type = type;
 			texture.path = texPath.C_Str();
 			textures.push_back(texture);
+			m_texturesLoaded.push_back(texture);
 		}
 	}
 	return textures;
