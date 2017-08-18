@@ -126,55 +126,10 @@ int main()
     // RENDER STATE
     glEnable(GL_DEPTH_TEST);
 
-
     // CAMERA
     g_camera.wPosition = glm::vec3(0.0f, 0.0f, 6.0f);
 
     // GEOMETRY	
-
-	// Cube vertex buffer
-    VBO cubeVbo;
-    glGenBuffers(1, &cubeVbo);
-
-	VAO cubeVao;
-	{
-		// Bind vertex array object
-		glGenVertexArrays(1, &cubeVao);
-		glBindVertexArray(cubeVao);
-
-		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(g_cubeVertices),
-		             g_cubeVertices, GL_STATIC_DRAW);
-		// Set our vertex attributes pointers
-		// Position
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-		                      (void *)0);
-		glEnableVertexAttribArray(0);
-		// Normal
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-		                      (void *)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-		// Texcoords
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-		                      (void *)(6 * sizeof(float)));
-        glEnableVertexAttribArray(2);
-		
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-	
-    glm::vec3 cubePositions[] = {
-        glm::vec3(0.0f,  0.0f,  0.0f),
-        glm::vec3(2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3(2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3(1.3f, -2.0f, -2.5f),
-        glm::vec3(1.5f,  2.0f, -2.5f),
-        glm::vec3(1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
 
     glm::vec3 pointLightWPositions[] = {
         glm::vec3(0.7f,  0.2f,  2.0f),
@@ -184,14 +139,17 @@ int main()
     };
 
 	// Lamp
+	VBO cubeVbo;
+	glGenBuffers(1, &cubeVbo);
 	VAO lampVao;
 	{
 		// Bind vertex array object
 		glGenVertexArrays(1, &lampVao);
 		glBindVertexArray(lampVao);
 
-		// we only need to bind to the VBO, the container's VBO's data already contains the correct data.
 		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(g_cubeVertices),
+					 g_cubeVertices, GL_STATIC_DRAW);
 		// Position
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
 		                      (void *)0);
@@ -205,44 +163,6 @@ int main()
 	Shader lightingShader("shaders/lighting3.vs", "shaders/lighting3.fs");
     Shader lampShader("shaders/lamp.vs", "shaders/lamp.fs");
 
-    // TEXTURES
-    const u32 NUM_TEXTURES = 2;
-    TXO textures[NUM_TEXTURES];
-    u8 *textureData[NUM_TEXTURES];
-    int widths[NUM_TEXTURES];
-    int heights[NUM_TEXTURES];
-    int nChannels[NUM_TEXTURES];
-    stbi_set_flip_vertically_on_load(true);
-    textureData[0] = stbi_load("assets/crate_dif.png", &widths[0], &heights[0], &nChannels[0], 0);
-    textureData[1] = stbi_load("assets/crate_spec.png", &widths[1], &heights[1], &nChannels[1], 0);
-    if (textureData[0] && textureData[1])
-    {
-        glGenTextures(NUM_TEXTURES, textures);
-
-        glBindTexture(GL_TEXTURE_2D, textures[0]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widths[0], heights[0], 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, textureData[0]);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glBindTexture(GL_TEXTURE_2D, textures[1]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widths[1], heights[1], 0, GL_RGBA,
-                     GL_UNSIGNED_BYTE, textureData[1]);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-    	std::cout << "Failed to load textures." << std::endl;
-    }
-    stbi_image_free(textureData[0]);
-    stbi_image_free(textureData[1]);
 
 	// MAIN LOOP
     while (!glfwWindowShouldClose(window))
@@ -267,17 +187,10 @@ int main()
 									  (float)VIEWPORT_WIDTH / VIEWPORT_HEIGHT,
 									  0.1f, 100.0f);
 
-		// cube
 		lightingShader.Use();
 		lightingShader.SetMat4("view", view);
 		lightingShader.SetMat4("projection", projection);
 
-        lightingShader.SetInt("material.diffuse", 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textures[0]);
-        lightingShader.SetInt("material.specular", 1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, textures[1]);
         lightingShader.SetFloat("material.shininess", 32.0f);
 
         lightingShader.SetVec3("dirLight.vDirection", view * glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f));
@@ -323,21 +236,8 @@ int main()
 		lightingShader.SetFloat("spotLight.linear", 0.09f);
 		lightingShader.SetFloat("spotLight.quadratic", 0.032f);
 
-		lightingShader.SetVec3("wViewPos", g_camera.wPosition);
-		glBindVertexArray(cubeVao);
 
-		// cubes
-		for (unsigned int i = 0; i < 10; i++)
-		{
-			glm::mat4 model;
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle),
-								glm::vec3(1.0f, 0.3f, 0.5f));
-			lightingShader.SetMat4("model", model);
 
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
 
 		// lamps
 		lampShader.Use();
@@ -359,7 +259,6 @@ int main()
 		glfwPollEvents();
 	}
 
-	glDeleteVertexArrays(1, &cubeVao);
 	glDeleteVertexArrays(1, &lampVao);
 	glDeleteBuffers(1, &cubeVbo);
 
