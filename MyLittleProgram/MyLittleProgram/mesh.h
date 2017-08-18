@@ -107,7 +107,7 @@ void Mesh::Draw(Shader shader) const
 			number = std::to_string(specularNr);
 		}
 
-		shader.SetInt(("material." + textureName + number).c_str(), i);
+		shader.setInt(("material." + textureName + number).c_str(), i);
 		glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
 	}
 	glActiveTexture(GL_TEXTURE0);
