@@ -75,7 +75,7 @@ int main()
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 	glEnable(GL_STENCIL_TEST);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
+	glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 
     // build and compile shaders
     // -------------------------
@@ -233,11 +233,11 @@ int main()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, cubeTexture); 	
 		model = glm::mat4();
-        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0001f, -1.0f));
         normalShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         model = glm::mat4();
-        model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(2.0f, 0.0001f, 0.0f));
         normalShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -251,12 +251,12 @@ int main()
 		const float outlineSF = 1.04f;
 		glBindVertexArray(cubeVAO);
 		model = glm::mat4();
-		model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+		model = glm::translate(model, glm::vec3(-1.0f, 0.0001f, -1.0f));
 		model = glm::scale(model, glm::vec3(outlineSF, outlineSF, outlineSF));
 		shaderSingleColor.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		model = glm::mat4();
-		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(2.0f, 0.0001f, 0.0f));
 		model = glm::scale(model, glm::vec3(outlineSF, outlineSF, outlineSF));
 		shaderSingleColor.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
