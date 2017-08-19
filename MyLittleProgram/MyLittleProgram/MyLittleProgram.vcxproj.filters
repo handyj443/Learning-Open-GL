@@ -81,5 +81,11 @@
     <None Include="shaders\lightingTex.vs">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="shaders\depth_testing.fs">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\depth_testing.vs">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

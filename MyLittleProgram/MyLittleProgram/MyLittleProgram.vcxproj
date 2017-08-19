@@ -140,6 +140,8 @@
     <None Include="shaders\1.vs" />
     <None Include="shaders\2.fs" />
     <None Include="shaders\2.vs" />
+    <None Include="shaders\depth_testing.fs" />
+    <None Include="shaders\depth_testing.vs" />
     <None Include="shaders\lamp.fs" />
     <None Include="shaders\lamp.vs" />
     <None Include="shaders\lighting.fs" />
