@@ -20,11 +20,11 @@ void processInput(GLFWwindow *window);
 unsigned int loadTexture(const char *path);
 
 // settings
-const unsigned int WINDOW_WIDTH = 1280;
-const unsigned int WINDOW_HEIGHT = 720;
+unsigned int g_windowWidth = 1280;
+unsigned int g_windowHeight = 720;
 const unsigned int VPORT_BORDER = 25;
-unsigned int g_vPortWidth = WINDOW_WIDTH - VPORT_BORDER*2;
-unsigned int g_vPortHeight = WINDOW_HEIGHT - VPORT_BORDER*2;
+unsigned int g_vPortWidth = g_windowWidth - VPORT_BORDER*2;
+unsigned int g_vPortHeight = g_windowHeight - VPORT_BORDER*2;
 const unsigned int VPORT_X_OFFSET = 25;
 const unsigned int VPORT_Y_OFFSET = 25;
 
@@ -53,7 +53,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(g_windowWidth, g_windowHeight, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -82,8 +82,8 @@ int main()
 	glEnable(GL_STENCIL_TEST);
 	glEnable(GL_CULL_FACE);
 	glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
-	glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, WINDOW_WIDTH - VPORT_BORDER * 2,
-			   WINDOW_HEIGHT - VPORT_BORDER * 2);
+	glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, g_windowWidth - VPORT_BORDER * 2,
+			   g_windowHeight - VPORT_BORDER * 2);
 
 	// build and compile shaders
     // -------------------------
@@ -316,7 +316,10 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
-    glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, width - VPORT_BORDER*2, height - VPORT_BORDER*2);
+    g_windowWidth = width;
+    g_windowHeight = height;
+    glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, g_windowWidth - VPORT_BORDER * 2,
+               g_windowHeight - VPORT_BORDER * 2);
 }
 
 // glfw: whenever the mouse moves, this callback is called
