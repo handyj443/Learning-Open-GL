@@ -22,11 +22,11 @@ unsigned int loadTexture(const char *path);
 // settings
 unsigned int g_windowWidth = 1280;
 unsigned int g_windowHeight = 720;
-const unsigned int VPORT_BORDER = 25;
+const unsigned int VPORT_BORDER = 75;
 unsigned int g_vPortWidth = g_windowWidth - VPORT_BORDER*2;
 unsigned int g_vPortHeight = g_windowHeight - VPORT_BORDER*2;
-const unsigned int VPORT_X_OFFSET = 25;
-const unsigned int VPORT_Y_OFFSET = 25;
+const unsigned int VPORT_X_OFFSET = VPORT_BORDER;
+const unsigned int VPORT_Y_OFFSET = VPORT_BORDER;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -82,8 +82,7 @@ int main()
 	glEnable(GL_STENCIL_TEST);
 	glEnable(GL_CULL_FACE);
 	glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
-	glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, g_windowWidth - VPORT_BORDER * 2,
-			   g_windowHeight - VPORT_BORDER * 2);
+	glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, g_vPortWidth, g_vPortHeight);
 
 	// build and compile shaders
     // -------------------------
@@ -318,8 +317,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // height will be significantly larger than specified on retina displays.
     g_windowWidth = width;
     g_windowHeight = height;
-    glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, g_windowWidth - VPORT_BORDER * 2,
-               g_windowHeight - VPORT_BORDER * 2);
+	g_vPortWidth = g_windowWidth - VPORT_BORDER*2;
+	g_vPortHeight = g_windowHeight - VPORT_BORDER*2;
+	glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, g_vPortWidth, g_vPortHeight);
 }
 
 // glfw: whenever the mouse moves, this callback is called
