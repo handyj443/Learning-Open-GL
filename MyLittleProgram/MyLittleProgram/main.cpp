@@ -34,6 +34,11 @@ float lastX = (float)g_vPortWidth  / 2.0;
 float lastY = (float)g_vPortHeight / 2.0;
 bool firstMouse = true;
 
+// framebuffer
+unsigned int g_framebuffer;
+unsigned int g_framebufferColTex;
+unsigned int g_framebufferDpStRbo;
+
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -78,29 +83,26 @@ int main()
 
 	// create secondary framebuffer
 	// -----------------------------
-	unsigned int framebuffer;
-	glGenFramebuffers(1, &framebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	glGenFramebuffers(1, &g_framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, g_framebuffer);
 	// add a colour texture attachment
-	unsigned int texColorBuffer;
-	glGenTextures(1, &texColorBuffer);
-	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+	glGenTextures(1, &g_framebufferColTex);
+	glBindTexture(GL_TEXTURE_2D, g_framebufferColTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, g_vPortWidth, g_vPortHeight, 0,
 				 GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // not optional!
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                           texColorBuffer, 0);
+                           g_framebufferColTex, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	// add a depth/stencil renderbuffer attachment
-	unsigned int rbo;
-	glGenRenderbuffers(1, &rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glGenRenderbuffers(1, &g_framebufferDpStRbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, g_framebufferDpStRbo);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, g_vPortWidth,
 						  g_vPortHeight);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-							  GL_RENDERBUFFER, rbo);
+							  GL_RENDERBUFFER, g_framebufferDpStRbo);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!"
@@ -257,7 +259,7 @@ int main()
         // ------
 
 		// 1. first pass to off screen buffer
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, g_framebuffer);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClearStencil(0);
 		glStencilMask(0xFF);
@@ -338,7 +340,7 @@ int main()
 
 		fullScreenQuad.use();
 		glBindVertexArray(quadVAO);
-		glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+		glBindTexture(GL_TEXTURE_2D, g_framebufferColTex);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
@@ -361,9 +363,9 @@ int main()
 	glDeleteTextures(1, &cubeTexture);
 	glDeleteTextures(1, &floorTexture);
 
-	glDeleteFramebuffers(1, &framebuffer);
-	glDeleteTextures(1, &texColorBuffer);
-	glDeleteRenderbuffers(1, &rbo);
+	glDeleteFramebuffers(1, &g_framebuffer);
+	glDeleteTextures(1, &g_framebufferColTex);
+	glDeleteRenderbuffers(1, &g_framebufferDpStRbo);
 
     glfwTerminate();
     return 0;
@@ -400,6 +402,38 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     g_windowHeight = height;
 	g_vPortWidth = g_windowWidth - VPORT_BORDER*2;
 	g_vPortHeight = g_windowHeight - VPORT_BORDER*2;
+    
+    // recreate secondary framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, g_framebuffer);
+
+	// destroy old framebuffer tex and rbo
+	glDeleteTextures(1, &g_framebufferColTex);
+	glDeleteRenderbuffers(1, &g_framebufferDpStRbo);
+
+    // Create new framebuffer tex and rbo with new viewport dimensions
+    glGenTextures(1, &g_framebufferColTex);
+    glBindTexture(GL_TEXTURE_2D, g_framebufferColTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, g_vPortWidth, g_vPortHeight, 0,
+                 GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // not optional!
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+						   g_framebufferColTex, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    // add a depth/stencil renderbuffer attachment
+    glGenRenderbuffers(1, &g_framebufferDpStRbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, g_framebufferDpStRbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, g_vPortWidth,
+                          g_vPortHeight);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                              GL_RENDERBUFFER, g_framebufferDpStRbo);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!"
+                  << std::endl;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 // glfw: whenever the mouse moves, this callback is called
