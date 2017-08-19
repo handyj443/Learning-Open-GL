@@ -1,4 +1,5 @@
 #include <vector>
+#include <string>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "stb_image.h"
@@ -18,6 +19,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 unsigned int loadTexture(const char *path);
+unsigned int loadCubemap(std::vector<std::string> faces);
 
 // settings
 unsigned int g_windowWidth = 1280;
@@ -118,6 +120,7 @@ int main()
     Shader normalShader("shaders/depth_testing.vs", "shaders/depth_testing.fs");
 	Shader shaderSingleColor("shaders/depth_testing.vs", "shaders/shaderSingleColor.fs");
 	Shader fullScreenQuad("shaders/fullScreenQuad.vs", "shaders/fullScreenQuad.fs");
+	Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -175,6 +178,50 @@ int main()
          5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
          5.0f, -0.5f, -5.0f,  2.0f, 2.0f								
     };
+	float skyboxVertices[] = {
+		// positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f
+	};
 	// Full screen quad in NDC
 	float quadVertices[] = {
 		// positions   // texCoords
@@ -230,13 +277,29 @@ int main()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	glBindVertexArray(0);
+	// skybox VAO
+	unsigned int skyboxVAO, skyboxVBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glBindVertexArray(0);
 
     // load textures
     // -------------
     unsigned int cubeTexture  = loadTexture("assets/shrug.jpg");
     unsigned int floorTexture = loadTexture("assets/container.jpg");
+	std::vector<std::string> skyboxFaces{
+		"assets/skycubemap/right.jpg", "assets/skycubemap/left.jpg",
+		"assets/skycubemap/top.jpg",   "assets/skycubemap/bottom.jpg",
+		"assets/skycubemap/back.jpg",  "assets/skycubemap/front.jpg"
+	};
+	unsigned int cubemapTexture = loadCubemap(skyboxFaces);
 
-    // shader configuration
+	// shader configuration
     // --------------------
     normalShader.use();
     normalShader.setInt("texture1", 0);
@@ -268,36 +331,42 @@ int main()
 		glClearStencil(0);
 		glStencilMask(0xFF);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_STENCIL_TEST);
+
 		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 		glViewport(0, 0, g_vPortWidth, g_vPortHeight);
 
-		// draw scene to off screen buffer
+        // vertex shader uniforms
         glm::mat4 model;
         glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(
-			glm::radians(camera.Zoom),
-			(float)g_vPortWidth / (float)g_vPortHeight, 0.1f, 100.0f);
-		normalShader.use();
-		normalShader.setMat4("view", view);
+        glm::mat4 projection = glm::perspective(
+            glm::radians(camera.Zoom),
+            (float)g_vPortWidth / (float)g_vPortHeight, 0.1f, 100.0f);
+        normalShader.use();
+        normalShader.setMat4("view", view);
         normalShader.setMat4("projection", projection);
-		shaderSingleColor.use();
-		shaderSingleColor.setMat4("view", view);
-		shaderSingleColor.setMat4("projection", projection);
-
-		// floor
-		glStencilMask(0x00); // disable write to the stencil buffer
-		normalShader.use();
-		glBindVertexArray(planeVAO);
-		glBindTexture(GL_TEXTURE_2D, floorTexture);
-		normalShader.setMat4("model", glm::mat4());
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glBindVertexArray(0);
+        shaderSingleColor.use();
+        shaderSingleColor.setMat4("view", view);
+        shaderSingleColor.setMat4("projection", projection);
+        skyboxShader.use();
+		// carve off translation component of the view matrix to center skybox
+		// at eye position always
+		skyboxShader.setMat4("view", glm::mat4(glm::mat3(view))); 
+        skyboxShader.setMat4("projection", projection);
 		
+		// Draw skybox FIRST
+		glDepthMask(GL_FALSE);
+		skyboxShader.use();
+		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDepthMask(GL_TRUE);
+		glEnable(GL_DEPTH_TEST);
+
         // cubes
 		// all fragments are drawn and update stencil buffer to 1
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF); 
 		glStencilMask(0xFF); // enable write to the stencil buffer
 		normalShader.use();
@@ -312,6 +381,18 @@ int main()
         model = glm::translate(model, glm::vec3(2.0f, 0.0001f, 0.0f));
         normalShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		// floor
+		glStencilMask(0x00); // disable write to the stencil buffer
+		glDisable(GL_CULL_FACE);
+		normalShader.use();
+		glBindVertexArray(planeVAO);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, floorTexture);
+		normalShader.setMat4("model", glm::mat4());
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+		glEnable(GL_CULL_FACE);
 
 		// only fragments "outside" the cube are drawn
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
@@ -332,6 +413,7 @@ int main()
 		model = glm::scale(model, glm::vec3(outlineSF, outlineSF, outlineSF));
 		shaderSingleColor.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+		
 
 		// 2. second pass to draw full screen quad
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -344,6 +426,7 @@ int main()
 
 		fullScreenQuad.use();
 		glBindVertexArray(quadVAO);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, g_framebufferColTex);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -359,10 +442,12 @@ int main()
     glDeleteVertexArrays(1, &cubeVAO);
     glDeleteVertexArrays(1, &planeVAO);
     glDeleteVertexArrays(1, &quadVAO);
+    glDeleteVertexArrays(1, &skyboxVAO);
 
     glDeleteBuffers(1, &cubeVBO);
     glDeleteBuffers(1, &planeVBO);
     glDeleteBuffers(1, &quadVBO);
+    glDeleteBuffers(1, &skyboxVBO);
 
 	glDeleteTextures(1, &cubeTexture);
 	glDeleteTextures(1, &floorTexture);
@@ -507,4 +592,37 @@ unsigned int loadTexture(char const *path)
     }
 
     return textureID;
+}
+
+unsigned int loadCubemap(std::vector<std::string> faces)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(false);
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+						 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+						 );
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return textureID;
 }
