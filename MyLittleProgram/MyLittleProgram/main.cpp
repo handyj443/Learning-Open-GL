@@ -1,3 +1,4 @@
+#include <vector>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "stb_image.h"
@@ -73,11 +74,13 @@ int main()
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_ALWAYS); // always pass the depth test (same effect as glDisable(GL_DEPTH_TEST))
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);  
 
     // build and compile shaders
     // -------------------------
-    Shader shader("shaders/depth_testing.vs", "shaders/depth_testing.fs");
+    Shader normalShader("shaders/depth_testing.vs", "shaders/depth_testing.fs");
+	Shader shaderSingleColor("shaders/depth_testing.vs", "shaders/shaderSingleColor.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -135,6 +138,14 @@ int main()
         -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
          5.0f, -0.5f, -5.0f,  2.0f, 2.0f								
     };
+    
+    std::vector<glm::vec3> vegetation;
+	vegetation.push_back(glm::vec3(-1.5f, 0.0f, -0.48f));
+	vegetation.push_back(glm::vec3(1.5f, 0.0f, 0.51f));
+	vegetation.push_back(glm::vec3(0.0f, 0.0f, 0.7f));
+	vegetation.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
+	vegetation.push_back(glm::vec3(0.5f, 0.0f, -0.6f));  
+    
     // cube VAO
     unsigned int cubeVAO, cubeVBO;
     glGenVertexArrays(1, &cubeVAO);
@@ -167,8 +178,8 @@ int main()
 
     // shader configuration
     // --------------------
-    shader.use();
-    shader.setInt("texture1", 0);
+    normalShader.use();
+    normalShader.setInt("texture1", 0);
 
     // render loop
     // -----------
@@ -187,33 +198,70 @@ int main()
         // render
         // ------
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearStencil(0);
+		glStencilMask(0xFF);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        shader.use();
         glm::mat4 model;
         glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::perspective(
 			glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT,
 			0.1f, 100.0f);
-		shader.setMat4("view", view);
-        shader.setMat4("projection", projection);
+		normalShader.use();
+		normalShader.setMat4("view", view);
+        normalShader.setMat4("projection", projection);
+		shaderSingleColor.use();
+		shaderSingleColor.setMat4("view", view);
+		shaderSingleColor.setMat4("projection", projection);
+
+		// floor
+		glStencilFunc(GL_ALWAYS, 0, 0xFF);
+		glStencilMask(0x00); // disable write to the stencil buffer
+		normalShader.use();
+		glBindVertexArray(planeVAO);
+		glBindTexture(GL_TEXTURE_2D, floorTexture);
+		normalShader.setMat4("model", glm::mat4());
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindVertexArray(0);
+		
         // cubes
+		// all fragments are drawn and update stencil buffer to 1
+		glStencilFunc(GL_ALWAYS, 1, 0xFF); 
+		glStencilMask(0xFF); // enable write to the stencil buffer
+		normalShader.use();
         glBindVertexArray(cubeVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, cubeTexture); 	
+		model = glm::mat4();
         model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
-        shader.setMat4("model", model);
+        normalShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-        shader.setMat4("model", model);
+        normalShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        // floor
-        glBindVertexArray(planeVAO);
-        glBindTexture(GL_TEXTURE_2D, floorTexture);
-        shader.setMat4("model", glm::mat4());
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+
+		// only fragments "outside" the cube are drawn
+		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+		glStencilMask(0x00);
+		glDisable(GL_DEPTH_TEST);
+
+		// draw two slightly larger cubes
+		shaderSingleColor.use();
+		const float outlineSF = 1.04f;
+		glBindVertexArray(cubeVAO);
+		model = glm::mat4();
+		model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
+		model = glm::scale(model, glm::vec3(outlineSF, outlineSF, outlineSF));
+		shaderSingleColor.setMat4("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		model = glm::mat4();
+		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(outlineSF, outlineSF, outlineSF));
+		shaderSingleColor.setMat4("model", model);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		glEnable(GL_DEPTH_TEST);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -297,6 +345,7 @@ unsigned int loadTexture(char const *path)
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
+	stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
     if (data)
     {

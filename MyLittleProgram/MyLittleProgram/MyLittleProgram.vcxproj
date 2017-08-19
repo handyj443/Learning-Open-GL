@@ -148,6 +148,7 @@
     <None Include="shaders\lighting3.vs" />
     <None Include="shaders\lightingTex.fs" />
     <None Include="shaders\lightingTex.vs" />
+    <None Include="shaders\shaderSingleColor.fs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
