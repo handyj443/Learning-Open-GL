@@ -20,13 +20,18 @@ void processInput(GLFWwindow *window);
 unsigned int loadTexture(const char *path);
 
 // settings
-const unsigned int SCR_WIDTH = 1280;
-const unsigned int SCR_HEIGHT = 720;
+const unsigned int WINDOW_WIDTH = 1280;
+const unsigned int WINDOW_HEIGHT = 720;
+const unsigned int VPORT_BORDER = 25;
+unsigned int g_vPortWidth = WINDOW_WIDTH - VPORT_BORDER*2;
+unsigned int g_vPortHeight = WINDOW_HEIGHT - VPORT_BORDER*2;
+const unsigned int VPORT_X_OFFSET = 25;
+const unsigned int VPORT_Y_OFFSET = 25;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = (float)SCR_WIDTH  / 2.0;
-float lastY = (float)SCR_HEIGHT / 2.0;
+float lastX = (float)g_vPortWidth  / 2.0;
+float lastY = (float)g_vPortHeight / 2.0;
 bool firstMouse = true;
 
 // timing
@@ -48,7 +53,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -77,10 +82,10 @@ int main()
 	glEnable(GL_STENCIL_TEST);
 	glEnable(GL_CULL_FACE);
 	glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
-	glFrontFace(GL_CW);
+	glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, WINDOW_WIDTH - VPORT_BORDER * 2,
+			   WINDOW_HEIGHT - VPORT_BORDER * 2);
 
-
-    // build and compile shaders
+	// build and compile shaders
     // -------------------------
     Shader normalShader("shaders/depth_testing.vs", "shaders/depth_testing.fs");
 	Shader shaderSingleColor("shaders/depth_testing.vs", "shaders/shaderSingleColor.fs");
@@ -208,7 +213,7 @@ int main()
         glm::mat4 model;
         glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 projection = glm::perspective(
-			glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT,
+			glm::radians(camera.Zoom), (float)g_vPortWidth / (float)g_vPortHeight,
 			0.1f, 100.0f);
 		normalShader.use();
 		normalShader.setMat4("view", view);
@@ -277,6 +282,8 @@ int main()
     glDeleteVertexArrays(1, &planeVAO);
     glDeleteBuffers(1, &cubeVBO);
     glDeleteBuffers(1, &planeVBO);
+	glDeleteTextures(1, &cubeTexture);
+	glDeleteTextures(1, &floorTexture);
 
     glfwTerminate();
     return 0;
@@ -309,7 +316,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and 
     // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
+    glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, width - VPORT_BORDER*2, height - VPORT_BORDER*2);
 }
 
 // glfw: whenever the mouse moves, this callback is called

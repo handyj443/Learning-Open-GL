@@ -35,6 +35,8 @@ class Mesh
 public:
 	Mesh(const std::vector<Vertex> &vertices, const std::vector<u32> &indices,
 		 const std::vector<Texture> &textures);
+	~Mesh();
+
 	void Draw(Shader shader) const;
 
 	std::vector<Vertex> m_vertices;
@@ -54,6 +56,13 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<u32> &indices,
 	, m_textures(textures)
 {
 	SetupMesh();
+}
+
+Mesh::~Mesh()
+{
+	glDeleteVertexArrays(1, &m_VAO);
+	glDeleteBuffers(1, &m_VBO);
+	glDeleteBuffers(1, &m_EBO);
 }
 
 void Mesh::SetupMesh()
