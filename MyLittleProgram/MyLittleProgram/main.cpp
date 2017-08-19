@@ -24,7 +24,7 @@ unsigned int loadCubemap(std::vector<std::string> faces);
 // settings
 unsigned int g_windowWidth = 1280;
 unsigned int g_windowHeight = 720;
-const unsigned int VPORT_BORDER = 75;
+const unsigned int VPORT_BORDER = 0;
 unsigned int g_vPortWidth = g_windowWidth - VPORT_BORDER*2;
 unsigned int g_vPortHeight = g_windowHeight - VPORT_BORDER*2;
 const unsigned int VPORT_X_OFFSET = VPORT_BORDER;
@@ -326,11 +326,13 @@ int main()
         // ------
 
 		// 1. first pass to off screen buffer
+        // ----------------------------------
 		glBindFramebuffer(GL_FRAMEBUFFER, g_framebuffer);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClearStencil(0);
 		glStencilMask(0xFF);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glStencilMask(0x00);
 
 		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 		glViewport(0, 0, g_vPortWidth, g_vPortHeight);
@@ -352,20 +354,11 @@ int main()
 		// at eye position always
 		skyboxShader.setMat4("view", glm::mat4(glm::mat3(view))); 
         skyboxShader.setMat4("projection", projection);
-		
-		// Draw skybox FIRST
-		glDepthMask(GL_FALSE);
-		skyboxShader.use();
-		glBindVertexArray(skyboxVAO);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glDepthMask(GL_TRUE);
-		glEnable(GL_DEPTH_TEST);
 
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
         // cubes
-		// all fragments are drawn and update stencil buffer to 1
-		glEnable(GL_CULL_FACE);
+        // all fragments are drawn and update stencil buffer to 1
 		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF); 
 		glStencilMask(0xFF); // enable write to the stencil buffer
@@ -381,9 +374,9 @@ int main()
         model = glm::translate(model, glm::vec3(2.0f, 0.0001f, 0.0f));
         normalShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		// floor
 		glStencilMask(0x00); // disable write to the stencil buffer
+        
+		// floor
 		glDisable(GL_CULL_FACE);
 		normalShader.use();
 		glBindVertexArray(planeVAO);
@@ -394,10 +387,10 @@ int main()
 		glBindVertexArray(0);
 		glEnable(GL_CULL_FACE);
 
+		// HUD
 		// only fragments "outside" the cube are drawn
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-		glStencilMask(0x00);
-		glDisable(GL_DEPTH_TEST);
+		glDepthFunc(GL_ALWAYS);
 
 		// draw two slightly larger cubes
 		shaderSingleColor.use();
@@ -413,9 +406,20 @@ int main()
 		model = glm::scale(model, glm::vec3(outlineSF, outlineSF, outlineSF));
 		shaderSingleColor.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-		
+		glStencilFunc(GL_ALWAYS, 0, 0xFF);
+		glDepthFunc(GL_LESS);
+
+        // Draw skybox last to optimised fragment discard due to depth testing
+        glDepthFunc(GL_LEQUAL);
+        skyboxShader.use();
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
 
 		// 2. second pass to draw full screen quad
+        // ---------------------------------------
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClearColor(0.0f, 0.2f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
