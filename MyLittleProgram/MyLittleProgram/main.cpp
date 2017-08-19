@@ -91,7 +91,9 @@ int main()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, g_vPortWidth, g_vPortHeight, 0,
 				 GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // not optional!
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                            g_framebufferColTex, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -240,6 +242,8 @@ int main()
     normalShader.setInt("texture1", 0);
     fullScreenQuad.use();
     fullScreenQuad.setInt("screenTexture", 0); // optional
+	fullScreenQuad.setFloat("screenWidth", g_vPortWidth);
+	fullScreenQuad.setFloat("screenHeight", g_vPortHeight);
 
     // render loop
     // -----------
@@ -415,8 +419,10 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glBindTexture(GL_TEXTURE_2D, g_framebufferColTex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, g_vPortWidth, g_vPortHeight, 0,
                  GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // not optional!
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
 						   g_framebufferColTex, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
