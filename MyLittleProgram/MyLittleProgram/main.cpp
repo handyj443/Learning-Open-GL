@@ -383,7 +383,7 @@ int main()
 		glStencilMask(0x00); // disable write to the stencil buffer
 		glEnable(GL_CULL_FACE);
         
-		nanosuit.Draw(nanosuitShader);
+		nanosuit.Draw(reflectionShader);
 
 		//// floor
 		//glDisable(GL_CULL_FACE);
