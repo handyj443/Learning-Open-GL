@@ -42,10 +42,10 @@ Model::Model(const char *path, bool gamma) : gammaCorrection(gamma)
 
 Model::~Model()
 {
-	for (const Texture &texture : m_texturesLoaded)
-	{
-		glDeleteTextures(1, &texture.id);
-	}
+	//for (const Texture &texture : m_texturesLoaded)
+	//{
+	//	glDeleteTextures(1, &texture.id);
+	//}
 }
 
 void Model::Draw(Shader shader) const

@@ -121,6 +121,7 @@ int main()
 	Shader shaderSingleColor("shaders/depth_testing.vs", "shaders/shaderSingleColor.fs");
 	Shader fullScreenQuad("shaders/fullScreenQuad.vs", "shaders/fullScreenQuad.fs");
 	Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
+	Shader nanosuitShader("shaders/nanosuit.vs", "shaders/nanosuit.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -287,6 +288,8 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glBindVertexArray(0);
 
+	Model nanosuit("assets/nanosuit/nanosuit.obj");
+
     // load textures
     // -------------
     unsigned int cubeTexture  = loadTexture("assets/shrug.jpg");
@@ -346,6 +349,9 @@ int main()
         reflectionShader.setMat4("view", view);
         reflectionShader.setMat4("projection", projection);
 		reflectionShader.setVec3("wEyePosition", camera.wPosition);
+        nanosuitShader.use();
+        nanosuitShader.setMat4("view", view);
+        nanosuitShader.setMat4("projection", projection);
         shaderSingleColor.use();
         shaderSingleColor.setMat4("view", view);
         shaderSingleColor.setMat4("projection", projection);
@@ -357,8 +363,8 @@ int main()
 
         glEnable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
-        // cubes
-        // all fragments are drawn and update stencil buffer to 1
+        //cubes
+        //all fragments are drawn and update stencil buffer to 1
 		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF); 
 		glStencilMask(0xFF); // enable write to the stencil buffer
@@ -377,6 +383,8 @@ int main()
 		glStencilMask(0x00); // disable write to the stencil buffer
 		glEnable(GL_CULL_FACE);
         
+		nanosuit.Draw(nanosuitShader);
+
 		//// floor
 		//glDisable(GL_CULL_FACE);
 		//reflectionShader.use();

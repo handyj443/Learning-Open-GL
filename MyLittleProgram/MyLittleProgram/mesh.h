@@ -60,9 +60,9 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<u32> &indices,
 
 Mesh::~Mesh()
 {
-	glDeleteVertexArrays(1, &m_VAO);
-	glDeleteBuffers(1, &m_VBO);
-	glDeleteBuffers(1, &m_EBO);
+	//glDeleteVertexArrays(1, &m_VAO);
+	//glDeleteBuffers(1, &m_VBO);
+	//glDeleteBuffers(1, &m_EBO);
 }
 
 void Mesh::SetupMesh()
