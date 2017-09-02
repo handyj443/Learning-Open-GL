@@ -117,7 +117,7 @@ int main()
 
 	// build and compile shaders
     // -------------------------
-	Shader reflectionShader("shaders/reflection.vs", "shaders/reflection.fs");
+	Shader refractionShader("shaders/reflection.vs", "shaders/refraction.fs");
 	Shader shaderSingleColor("shaders/depth_testing.vs", "shaders/shaderSingleColor.fs");
 	Shader fullScreenQuad("shaders/fullScreenQuad.vs", "shaders/fullScreenQuad.fs");
 	Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
@@ -303,8 +303,8 @@ int main()
 
 	// shader configuration
     // --------------------
-    reflectionShader.use();
-    reflectionShader.setInt("texture1", 0);
+    refractionShader.use();
+    refractionShader.setInt("texture1", 0);
     fullScreenQuad.use();
     fullScreenQuad.setInt("screenTexture", 0); // optional
 	fullScreenQuad.setFloat("screenWidth", g_vPortWidth);
@@ -345,10 +345,10 @@ int main()
         glm::mat4 projection = glm::perspective(
             glm::radians(camera.Zoom),
             (float)g_vPortWidth / (float)g_vPortHeight, 0.1f, 100.0f);
-        reflectionShader.use();
-        reflectionShader.setMat4("view", view);
-        reflectionShader.setMat4("projection", projection);
-		reflectionShader.setVec3("wEyePosition", camera.wPosition);
+        refractionShader.use();
+        refractionShader.setMat4("view", view);
+        refractionShader.setMat4("projection", projection);
+		refractionShader.setVec3("wEyePosition", camera.wPosition);
         nanosuitShader.use();
         nanosuitShader.setMat4("view", view);
         nanosuitShader.setMat4("projection", projection);
@@ -368,30 +368,36 @@ int main()
 		glEnable(GL_STENCIL_TEST);
 		glStencilFunc(GL_ALWAYS, 1, 0xFF); 
 		glStencilMask(0xFF); // enable write to the stencil buffer
-		reflectionShader.use();
+		refractionShader.use();
         glBindVertexArray(cubeVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
 		model = glm::mat4();
         model = glm::translate(model, glm::vec3(-1.0f, 0.0001f, -1.0f));
-        reflectionShader.setMat4("model", model);
+        refractionShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(2.0f, 0.0001f, 0.0f));
-        reflectionShader.setMat4("model", model);
+        refractionShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 		glStencilMask(0x00); // disable write to the stencil buffer
 		glEnable(GL_CULL_FACE);
         
-		nanosuit.Draw(reflectionShader);
+		model = glm::mat4();
+		glm::vec3 nanosuitPosition = { 0.0, 1.0, 0.0 };
+		float nanosuitScale = 0.05f;
+		model = glm::translate(model, nanosuitPosition);
+		model = glm::scale(model, glm::vec3(nanosuitScale));
+		nanosuitShader.setMat4("model", model);
+		nanosuit.Draw(refractionShader);
 
 		//// floor
 		//glDisable(GL_CULL_FACE);
-		//reflectionShader.use();
+		//refractionShader.use();
 		//glBindVertexArray(planeVAO);
 		//glActiveTexture(GL_TEXTURE0);
 		//glBindTexture(GL_TEXTURE_2D, floorTexture);
-		//reflectionShader.setMat4("model", glm::mat4());
+		//refractionShader.setMat4("model", glm::mat4());
 		//glDrawArrays(GL_TRIANGLES, 0, 6);
 		//glBindVertexArray(0);
 		//glEnable(GL_CULL_FACE);
