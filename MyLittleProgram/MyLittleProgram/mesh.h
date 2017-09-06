@@ -23,7 +23,8 @@ struct Texture
 		Diffuse,
 		Specular,
 		Normal,
-		Height
+		Height,
+		Reflection
 	};
 	u32 id;
 	Type type;
@@ -97,6 +98,7 @@ void Mesh::Draw(Shader shader) const
 {
 	unsigned int diffuseNr = 0;
 	unsigned int specularNr = 0;
+	unsigned int reflectionNr = 0;
 	for (unsigned int i = 0; i < m_textures.size(); i++)
 	{
 		// activate proper texture unit before binding
@@ -113,13 +115,18 @@ void Mesh::Draw(Shader shader) const
 		else if (type == Texture::Type::Specular)
 		{
 			textureName = "texture_specular";
-			number = std::to_string(specularNr);
+			number = std::to_string(specularNr++);
+		}
+		else if (type == Texture::Type::Reflection)
+		{
+			textureName = "texture_reflection";
+			number = std::to_string(reflectionNr++);
 		}
 
 		shader.setInt(("material." + textureName + number).c_str(), i);
 		glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
 	}
-	glActiveTexture(GL_TEXTURE0);
+	//glActiveTexture(GL_TEXTURE0); // why?
 
 	// draw mesh
 	glBindVertexArray(m_VAO);

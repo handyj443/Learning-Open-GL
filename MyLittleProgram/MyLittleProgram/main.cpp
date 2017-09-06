@@ -121,7 +121,8 @@ int main()
 	Shader shaderSingleColor("shaders/depth_testing.vs", "shaders/shaderSingleColor.fs");
 	Shader fullScreenQuad("shaders/fullScreenQuad.vs", "shaders/fullScreenQuad.fs");
 	Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
-	Shader nanosuitShader("shaders/nanosuit.vs", "shaders/nanosuit.fs");
+	//Shader nanosuitShader("shaders/nanosuit.vs", "shaders/nanosuit.fs");
+	Shader nanosuitReflShader("shaders/nanosuitRefl.vs", "shaders/nanosuitRefl.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -234,13 +235,6 @@ int main()
 		1.0f,  1.0f,  1.0f, 1.0f
 	};
     
-    std::vector<glm::vec3> vegetation;
-	vegetation.push_back(glm::vec3(-1.5f, 0.0f, -0.48f));
-	vegetation.push_back(glm::vec3(1.5f, 0.0f, 0.51f));
-	vegetation.push_back(glm::vec3(0.0f, 0.0f, 0.7f));
-	vegetation.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
-	vegetation.push_back(glm::vec3(0.5f, 0.0f, -0.6f));  
-    
     // cube VAO
     unsigned int cubeVAO, cubeVBO;
     glGenVertexArrays(1, &cubeVAO);
@@ -288,7 +282,7 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glBindVertexArray(0);
 
-	Model nanosuit("assets/nanosuit/nanosuit.obj");
+	Model nanosuit("assets/nanosuit_reflection/nanosuit.obj");
 
     // load textures
     // -------------
@@ -349,9 +343,9 @@ int main()
         refractionShader.setMat4("view", view);
         refractionShader.setMat4("projection", projection);
 		refractionShader.setVec3("wEyePosition", camera.wPosition);
-        nanosuitShader.use();
-        nanosuitShader.setMat4("view", view);
-        nanosuitShader.setMat4("projection", projection);
+        nanosuitReflShader.use();
+        nanosuitReflShader.setMat4("view", view);
+        nanosuitReflShader.setMat4("projection", projection);
         shaderSingleColor.use();
         shaderSingleColor.setMat4("view", view);
         shaderSingleColor.setMat4("projection", projection);
@@ -388,8 +382,14 @@ int main()
 		float nanosuitScale = 0.05f;
 		model = glm::translate(model, nanosuitPosition);
 		model = glm::scale(model, glm::vec3(nanosuitScale));
-		nanosuitShader.setMat4("model", model);
-		nanosuit.Draw(refractionShader);
+		nanosuitReflShader.use();
+		nanosuitReflShader.setMat4("model", model);
+		nanosuitReflShader.setVec3("wEyePosition", camera.wPosition);
+		nanosuitReflShader.setInt("skybox", 4);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+
+		nanosuit.Draw(nanosuitReflShader);
 
 		//// floor
 		//glDisable(GL_CULL_FACE);
@@ -426,7 +426,7 @@ int main()
 		glDepthFunc(GL_LESS);
 		glEnable(GL_CULL_FACE);
 
-        // Draw skybox last to optimised fragment discard due to depth testing
+        // Draw skybox last to optimise fragment discard due to depth testing
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
         glBindVertexArray(skyboxVAO);
@@ -480,6 +480,7 @@ int main()
     glfwTerminate();
     return 0;
 }
+
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
