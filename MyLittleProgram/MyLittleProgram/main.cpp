@@ -78,25 +78,25 @@ int main()
 
 	// create secondary framebuffer
 	// -----------------------------
+	const unsigned int SAMPLES = 4;
 	unsigned int framebuffer;
 	glGenFramebuffers(1, &framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 	// add a colour texture attachment
 	unsigned int texColorBuffer;
 	glGenTextures(1, &texColorBuffer);
-	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, g_vPortWidth, g_vPortHeight, 0,
-				 GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texColorBuffer);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, SAMPLES, GL_RGB, g_vPortWidth, g_vPortHeight, GL_TRUE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // not optional!
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE,
                            texColorBuffer, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	// add a depth/stencil renderbuffer attachment
 	unsigned int rbo;
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, g_vPortWidth,
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, SAMPLES, GL_DEPTH24_STENCIL8, g_vPortWidth,
 						  g_vPortHeight);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
@@ -327,20 +327,25 @@ int main()
 		shaderSingleColor.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		// 2. second pass to draw full screen quad
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClearColor(0.0f, 0.2f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_STENCIL_TEST);
-		glDisable(GL_CULL_FACE);
-		glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, g_vPortWidth, g_vPortHeight);
+		// // 2. second pass to draw full screen quad
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glClearColor(0.0f, 0.2f, 0.3f, 1.0f);
+		//glClear(GL_COLOR_BUFFER_BIT);
+		//glDisable(GL_DEPTH_TEST);
+		//glDisable(GL_STENCIL_TEST);
+		//glDisable(GL_CULL_FACE);
+		//glViewport(VPORT_X_OFFSET, VPORT_Y_OFFSET, g_vPortWidth, g_vPortHeight);
 
-		fullScreenQuad.use();
-		glBindVertexArray(quadVAO);
-		glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		// fullScreenQuad.use();
+		// glBindVertexArray(quadVAO);
+		// glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+		// glDrawArrays(GL_TRIANGLES, 0, 6);
 
+		// Blit offscreen framebuffer to default framebuffer
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBlitFramebuffer(0, 0, g_vPortWidth, g_vPortWidth, 0, 0, g_vPortWidth, g_vPortWidth, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
