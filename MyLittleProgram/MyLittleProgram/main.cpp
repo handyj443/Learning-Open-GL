@@ -117,8 +117,8 @@ int main()
 
 	// build and compile shaders
     // -------------------------
-    Shader normalShader("shaders/depth_testing.vs", "shaders/depth_testing.fs");
-	Shader shaderSingleColor("shaders/depth_testing.vs", "shaders/shaderSingleColor.fs");
+    Shader normalShader("shaders/normal.vs", "shaders/normal.fs");
+	Shader shaderSingleColor("shaders/normal.vs", "shaders/shaderSingleColor.fs");
 	Shader fullScreenQuad("shaders/fullScreenQuad.vs", "shaders/fullScreenQuad.fs");
 	Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
 
