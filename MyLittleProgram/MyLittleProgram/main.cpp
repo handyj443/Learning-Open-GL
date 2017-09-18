@@ -76,6 +76,8 @@ int main()
         return -1;
     }
 
+	glEnable(GL_MULTISAMPLE);
+
 	// create secondary framebuffer
 	// -----------------------------
 	const unsigned int SAMPLES = 4;
@@ -344,7 +346,7 @@ int main()
 		// Blit offscreen framebuffer to default framebuffer
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glBlitFramebuffer(0, 0, g_vPortWidth, g_vPortWidth, VPORT_X_OFFSET, VPORT_Y_OFFSET, g_vPortWidth, g_vPortWidth, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, g_vPortWidth, g_vPortHeight, VPORT_X_OFFSET, VPORT_Y_OFFSET, g_vPortWidth + VPORT_X_OFFSET, g_vPortHeight + VPORT_Y_OFFSET, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
