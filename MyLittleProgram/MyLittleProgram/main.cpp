@@ -231,8 +231,8 @@ int main()
 
     // load textures
     // -------------
-    unsigned int cubeTexture  = loadTexture("assets/shrug.jpg");
-    unsigned int floorTexture = loadTexture("assets/container.jpg");
+    unsigned int cubeTexture  = loadTexture("assets/shrug2.jpg");
+    unsigned int floorTexture = loadTexture("assets/container2.jpg");
 
     // shader configuration
     // --------------------
